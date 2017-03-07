@@ -25,7 +25,7 @@ defmodule ExRabbit.Publisher.Worker do
       {:ok, channel} ->
         {:ok, channel}
       {:error, reason} ->
-        Logger.error("[#{__MODULE__}] Error opening a channel: #{reason}. Waiting to try again...")
+        Logger.error("[#{__MODULE__}] Error opening a channel: #{inspect reason}. Waiting to try again...")
 
         :timer.sleep(Application.get_env(:ex_rabbit, :backoff))
         open_channel()

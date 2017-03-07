@@ -37,7 +37,7 @@ defmodule ExRabbit.Connection do
         {:ok, conn}
 
       {:error, reason} ->
-        Logger.error("[#{__MODULE__}] Error attempting to connect to AMQP: #{reason}. Waiting to reconnect...")
+        Logger.error("[#{__MODULE__}] Error attempting to connect to AMQP: #{inspect reason}. Waiting to reconnect...")
 
         Application.get_env(:ex_rabbit, :backoff)
           |> :timer.sleep

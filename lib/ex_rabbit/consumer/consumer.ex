@@ -89,7 +89,7 @@ defmodule ExRabbit.Consumer.Consumer do
       Logger.info("[#{__MODULE__}] AMQP channel open for consumer #{ctag}.")
       {:ok, ctag}
     else
-      err -> Logger.error("[#{__MODULE__}] Error opening channel. #{err}")
+      err -> Logger.error("[#{__MODULE__}] Error opening channel. #{inspect err}")
     end
   end
 
