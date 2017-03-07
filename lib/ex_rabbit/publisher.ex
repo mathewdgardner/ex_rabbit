@@ -14,7 +14,7 @@ defmodule ExRabbit.Publisher do
 
   def publish(_exchange, _routing_key, _payload, options \\ [])
   def publish(exchange, routing_key, payload, options)
-  when not is_bitstring(payload)
+  when not is_binary(payload)
   do
     {:ok, encoded_payload} = Poison.encode(payload)
     publish(exchange, routing_key, encoded_payload, options)
