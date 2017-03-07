@@ -3,7 +3,7 @@ defmodule ExRabbit.Consumer.Consumer do
   require Logger
 
   def start_link(module) do
-    GenServer.start_link(__MODULE__, module, name: via(module))
+    GenServer.start_link(__MODULE__, module, name: ExRabbit.Application.via({:consumer, module}))
   end
 
   def init(module) do
@@ -16,8 +16,6 @@ defmodule ExRabbit.Consumer.Consumer do
   end
 
   def name(), do: Process.info(self()) |> Keyword.get(:registered_name)
-
-  def via(module), do: {:via, Registry, {:ex_rabbit_registry, module}}
 
   # AMQP.Basic.consume callbacks
 

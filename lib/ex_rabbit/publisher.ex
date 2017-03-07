@@ -7,11 +7,10 @@ defmodule ExRabbit.Publisher do
   end
 
   def init(size) do
-    children = 1..size
+    1..size
       |> Enum.to_list
       |> Enum.map(fn(num) -> worker(ExRabbit.Publisher.Worker, [num], id: num) end)
-
-    supervise(children, strategy: :one_for_one)
+      |> supervise(strategy: :one_for_one)
   end
 
   def publish(_exchange, _routing_key, _payload, options \\ [])
@@ -24,8 +23,9 @@ defmodule ExRabbit.Publisher do
 
   def publish(exchange, routing_key, payload, options) do
     pool_size = Application.get_env(:ex_rabbit, :pool_size)
-    num = Enum.random(1..pool_size)
-    channel = GenServer.call(:"#{ExRabbit.Publisher.Worker}_#{num}", :get)
-    AMQP.Basic.publish(channel, exchange, routing_key, payload, options)
+
+    ExRabbit.Application.via({:publisher, Enum.random(1..pool_size)})
+      |> GenServer.call(:get)
+      |> AMQP.Basic.publish(exchange, routing_key, payload, options)
   end
 end

@@ -18,4 +18,6 @@ defmodule ExRabbit.Application do
 
     supervise(children, strategy: :one_for_all)
   end
+
+  def via(name), do: {:via, Registry, {:ex_rabbit_registry, name}}
 end
