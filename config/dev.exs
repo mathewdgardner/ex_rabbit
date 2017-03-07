@@ -6,10 +6,10 @@ config :ex_rabbit,
   port: 5672,
   user: "guest",
   pass: "guest",
+  backoff: 1000,
   heartbeat: 10,
-  backoff: 10,
-  prefetch_count: 1,
   pool_size: 5,
+  prefetch_count: 1,
   modules: []
 
 config :logger, level: :debug

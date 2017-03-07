@@ -6,9 +6,10 @@ config :ex_rabbit,
   port: 5672,
   user: "guest",
   pass: "guest",
-  heartbeat: 10,
   backoff: 1000,
+  heartbeat: 10,
+  pool_size: 5,
   prefetch_count: 4,
-  rabbits: []
+  modules: []
 
 config :logger, level: :error
