@@ -3,7 +3,7 @@ defmodule ExRabbit.Consumer.Consumer do
   require Logger
 
   def start_link(module) do
-    GenServer.start_link(__MODULE__, module, name: ExRabbit.Application.via({:consumer, module}))
+    GenServer.start_link(__MODULE__, module, name: ExRabbit.Application.via({__MODULE__, module}))
   end
 
   def init(module) do

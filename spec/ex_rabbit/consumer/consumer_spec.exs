@@ -5,7 +5,7 @@ defmodule ExRabbit.Consumer.ConsumerSpec do
 
   describe "ExRabbit.Consumer.Consumer" do
     it "should open a channel" do
-      %{channel: channel} = ExRabbit.Application.via({:consumer, Examples.Topic})
+      %{channel: channel} = ExRabbit.Application.via({ExRabbit.Consumer.Consumer, Examples.Topic})
         |> :sys.get_state
 
       expect channel |> to(be_struct AMQP.Channel)
@@ -15,7 +15,7 @@ defmodule ExRabbit.Consumer.ConsumerSpec do
       conn = :sys.get_state(ExRabbit.Connection)
 
       with_mock AMQP.Channel, [open: fn(_conn) -> {:error, "Made up reason"} end] do
-        name = ExRabbit.Application.via({:consumer, Examples.Topic})
+        name = ExRabbit.Application.via({ExRabbit.Consumer.Consumer, Examples.Topic})
         :ok = GenServer.stop(name)
         :timer.sleep(Application.get_env(:ex_rabbit, :backoff) + 100)
 
@@ -24,7 +24,7 @@ defmodule ExRabbit.Consumer.ConsumerSpec do
     end
 
     it "should get a new channel on error" do
-      name = ExRabbit.Application.via({:consumer, Examples.Topic})
+      name = ExRabbit.Application.via({ExRabbit.Consumer.Consumer, Examples.Topic})
       :ok = GenServer.stop(name)
       :timer.sleep(100)
       %{channel: channel} = :sys.get_state(name)

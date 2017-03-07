@@ -3,7 +3,7 @@ defmodule ExRabbit.Publisher.Worker do
   require Logger
 
   def start_link(num) do
-    GenServer.start_link(__MODULE__, [], name: ExRabbit.Application.via({:publisher, num}))
+    GenServer.start_link(__MODULE__, [], name: ExRabbit.Application.via({__MODULE__, num}))
   end
 
   def init([]) do

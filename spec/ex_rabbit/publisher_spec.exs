@@ -3,7 +3,7 @@ defmodule ExRabbit.PublisherSpec do
 
   describe "ExRabbit.Publisher" do
     it "should publish to a topic" do
-      channel = ExRabbit.Application.via({:publisher, 1})
+      channel = ExRabbit.Application.via({ExRabbit.Publisher.Worker, 1})
         |> :sys.get_state
       exchange = "test_topic_exchange"
       queue = "test_queue"
@@ -25,7 +25,7 @@ defmodule ExRabbit.PublisherSpec do
     end
 
     it "should publish with an ecoded payload" do
-      channel = ExRabbit.Application.via({:publisher, 1})
+      channel = ExRabbit.Application.via({ExRabbit.Publisher.Worker, 1})
         |> :sys.get_state
       exchange = "test_topic_exchange"
       queue = "test_queue"
