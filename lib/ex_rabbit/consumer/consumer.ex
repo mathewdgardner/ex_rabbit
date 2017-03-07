@@ -1,4 +1,9 @@
 defmodule ExRabbit.Consumer.Consumer do
+  @moduledoc """
+    GenServer to consume a queue. It keeps its own channel for consumption and handles message acknowledgement and
+    rejection.
+  """
+
   use GenServer
   require Logger
 
@@ -51,6 +56,8 @@ defmodule ExRabbit.Consumer.Consumer do
 
   # Private
 
+  # Calls for a connection to RabbitMQ, then opens a channel on the connection. If a channel fails to open, it will
+  # retry.
   @spec open_channel() :: {:ok, AMQP.Channel.t}
   defp open_channel() do
     connection = GenServer.call(ExRabbit.Connection, :get)
@@ -66,6 +73,8 @@ defmodule ExRabbit.Consumer.Consumer do
     end
   end
 
+  # Asserts the exchange, queue, binding, qos according to the given consumer module's config/0 output and begins
+  # consuming.
   @spec setup(AMQP.Channel.t, keyword()) :: {:ok, String.t}
   defp setup(channel, config) do
     with name             <- Keyword.get(config, :name, :ex_rabbit),
@@ -93,6 +102,7 @@ defmodule ExRabbit.Consumer.Consumer do
     end
   end
 
+  # Default configuration options.
   @spec config() :: keyword()
   defp config() do
     [

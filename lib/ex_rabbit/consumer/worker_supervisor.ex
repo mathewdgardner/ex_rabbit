@@ -1,4 +1,8 @@
 defmodule ExRabbit.Consumer.WorkerSupervisor do
+  @moduledoc """
+    Supervisor for creating workers on message receipt.
+  """
+
   use Supervisor
   require Logger
 
@@ -14,6 +18,9 @@ defmodule ExRabbit.Consumer.WorkerSupervisor do
     supervise(children, strategy: :simple_one_for_one)
   end
 
+  @doc """
+    Spawns a GenServer to handle the given message.
+  """
   @spec handle_message(map(), map(), pid()) :: :ok
   def handle_message(payload, meta, consumer_pid) do
     Logger.debug("[#{__MODULE__}] Handling message.")

@@ -1,4 +1,9 @@
 defmodule ExRabbit.Publisher.Worker do
+  @moduledoc """
+    GenServer used as member to a channel pool. If the channel is borked or the supervision tree fails, a new channel
+    will be obtained.
+  """
+
   use GenServer
   require Logger
 
@@ -18,6 +23,9 @@ defmodule ExRabbit.Publisher.Worker do
 
   # Private
 
+  # Calls for a connection to RabbitMQ, then opens a channel on the connection. If a channel fails to open, it will
+  # retry.
+  @spec open_channel() :: {:ok, AMQP.Channel.t}
   defp open_channel() do
     connection = GenServer.call(ExRabbit.Connection, :get)
 

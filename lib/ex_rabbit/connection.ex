@@ -1,4 +1,9 @@
 defmodule ExRabbit.Connection do
+  @moduledoc """
+    GenServer for keeping a connection to RabbitMQ. If the connection is lost or the supervision tree goes down, a new
+    connection will be obtained.
+  """
+
   use GenServer
   require Logger
 
@@ -16,6 +21,9 @@ defmodule ExRabbit.Connection do
     {:reply, connection, connection}
   end
 
+  @doc """
+    Build the URL to RabbitMQ from the application's configuration.
+  """
   @spec url() :: String.t
   def url() do
     host = Application.get_env(:ex_rabbit, :host)
@@ -29,6 +37,8 @@ defmodule ExRabbit.Connection do
 
   # Private
 
+  # Opens a connection to RabbitMQ. If the connection is lost or the supervision tree fails it will reconnect. If it
+  # cannot obtain a connection, it will retry.
   @spec connect() :: {:ok, AMQP.Connection.t}
   defp connect() do
     case AMQP.Connection.open(url()) do

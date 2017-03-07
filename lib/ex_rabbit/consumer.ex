@@ -1,4 +1,8 @@
 defmodule ExRabbit.Consumer do
+  @moduledoc """
+    Supervisor for the consumer modules.
+  """
+
   use Supervisor
   require Logger
 

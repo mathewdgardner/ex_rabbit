@@ -1,4 +1,8 @@
 defmodule ExRabbit.Publisher do
+  @moduledoc """
+    Supervisor for managing a channel pool. Each of its workers is a GenServer holding a channel.
+  """
+
   use Supervisor
   require Logger
 
@@ -12,6 +16,9 @@ defmodule ExRabbit.Publisher do
       |> supervise(strategy: :one_for_one)
   end
 
+  @doc """
+    Publish a message to an exchange. A channel will be randomly aquired from the pool for use.
+  """
   @spec publish(String.t, String.t, map() | String.t, keyword()) :: :ok
   def publish(_exchange, _routing_key, _payload, options \\ [])
   def publish(exchange, routing_key, payload, options)
