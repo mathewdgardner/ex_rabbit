@@ -51,6 +51,7 @@ defmodule ExRabbit.Consumer.Consumer do
 
   # Private
 
+  @spec open_channel() :: {:ok, AMQP.Channel.t}
   defp open_channel() do
     connection = GenServer.call(ExRabbit.Connection, :get)
 
@@ -65,6 +66,7 @@ defmodule ExRabbit.Consumer.Consumer do
     end
   end
 
+  @spec setup(AMQP.Channel.t, keyword()) :: {:ok, String.t}
   defp setup(channel, config) do
     with name             <- Keyword.get(config, :name, :ex_rabbit),
          exchange         <- Keyword.get(config, :exchange, []),
@@ -83,13 +85,15 @@ defmodule ExRabbit.Consumer.Consumer do
          :ok              <- AMQP.Queue.bind(channel, queue_name, exchange_name, binding_options),
          :ok              <- AMQP.Basic.qos(channel, qos_options)
     do
-      {:ok, _ctag} = AMQP.Basic.consume(channel, queue_name, self(), consume_options)
-      Logger.info("[#{__MODULE__}] AMQP channel open.")
+      {:ok, ctag} = AMQP.Basic.consume(channel, queue_name, self(), consume_options)
+      Logger.info("[#{__MODULE__}] AMQP channel open for consumer #{ctag}.")
+      {:ok, ctag}
     else
       err -> Logger.error("[#{__MODULE__}] Error opening channel. #{err}")
     end
   end
 
+  @spec config() :: keyword()
   defp config() do
     [
       name: "rabbit_name",

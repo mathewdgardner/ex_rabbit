@@ -14,6 +14,7 @@ defmodule ExRabbit.Consumer.WorkerSupervisor do
     supervise(children, strategy: :simple_one_for_one)
   end
 
+  @spec handle_message(map(), map(), pid()) :: :ok
   def handle_message(payload, meta, consumer_pid) do
     Logger.debug("[#{__MODULE__}] Handling message.")
 

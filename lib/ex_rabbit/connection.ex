@@ -16,6 +16,7 @@ defmodule ExRabbit.Connection do
     {:reply, connection, connection}
   end
 
+  @spec url() :: String.t
   def url() do
     host = Application.get_env(:ex_rabbit, :host)
     port = Application.get_env(:ex_rabbit, :port)
@@ -28,6 +29,7 @@ defmodule ExRabbit.Connection do
 
   # Private
 
+  @spec connect() :: {:ok, AMQP.Connection.t}
   defp connect() do
     case AMQP.Connection.open(url()) do
       {:ok, conn} ->

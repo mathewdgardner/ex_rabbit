@@ -40,6 +40,7 @@ defmodule ExRabbit.Mixfile do
       {:poison, "~> 2.2"},
 
       # Development
+      {:dialyxir, "~> 0.5", only: [:dev, :test], runtime: false},
       {:espec, "~> 1.3.0", only: :test},
       {:httpoison, "~> 0.10.0", only: :test},
       {:mock, "~> 0.2.0", only: :test}

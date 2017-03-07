@@ -12,6 +12,7 @@ defmodule ExRabbit.Publisher do
       |> supervise(strategy: :one_for_one)
   end
 
+  @spec publish(String.t, String.t, map() | String.t, keyword()) :: :ok
   def publish(_exchange, _routing_key, _payload, options \\ [])
   def publish(exchange, routing_key, payload, options)
   when not is_binary(payload)

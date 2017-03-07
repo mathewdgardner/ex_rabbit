@@ -19,5 +19,6 @@ defmodule ExRabbit.Application do
     supervise(children, strategy: :one_for_all)
   end
 
+  @spec via(any()) :: {:via, atom(), tuple()}
   def via(name), do: {:via, Registry, {:ex_rabbit_registry, name}}
 end
