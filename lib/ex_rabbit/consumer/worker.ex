@@ -21,13 +21,13 @@ defmodule ExRabbit.Consumer.Worker do
   # Callbacks
 
   def handle_cast(:handle_message, %{module: module, payload: payload, meta: meta} = state) do
-    Logger.debug "[#{__MODULE__}] Received payload for module [#{module}]."
+    Logger.debug("[#{__MODULE__}] Received payload for module [#{module}].")
 
     config = module.config()
 
-    {:ok, msg} = cond do
-      Keyword.get(config, :parse_json, true) === true -> Poison.decode(payload)
-      true                                            -> {:ok, payload}
+    {:ok, msg} = case Keyword.get(config, :parse_json, true) do
+      true -> Poison.decode(payload)
+      false -> {:ok, payload}
     end
 
     case module.handler(msg, meta) do
@@ -37,13 +37,13 @@ defmodule ExRabbit.Consumer.Worker do
   end
 
   def terminate(:normal, %{consumer_pid: pid, result: _result} = state) do
-    Logger.debug "[#{__MODULE__}] Terminating with message acknowledgement."
+    Logger.debug("[#{__MODULE__}] Terminating with message acknowledgement.")
 
     GenServer.cast(pid, {:ack, state})
   end
 
   def terminate(:normal, %{consumer_pid: pid, error: _reason} = state) do
-    Logger.debug "[#{__MODULE__}] Terminating with message rejection."
+    Logger.debug("[#{__MODULE__}] Terminating with message rejection.")
 
     GenServer.cast(pid, {:reject, state})
   end

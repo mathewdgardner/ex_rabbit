@@ -8,7 +8,6 @@ defmodule ExRabbit.Publisher do
 
   def init(size) do
     1..size
-      |> Enum.to_list
       |> Enum.map(fn(num) -> worker(ExRabbit.Publisher.Worker, [num], id: num) end)
       |> supervise(strategy: :one_for_one)
   end

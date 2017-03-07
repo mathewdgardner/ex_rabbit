@@ -15,18 +15,18 @@ defmodule ExRabbit.Consumer.Consumer do
     {:ok, %{channel: channel, config: config}}
   end
 
-  def name(), do: Process.info(self()) |> Keyword.get(:registered_name)
-
   # AMQP.Basic.consume callbacks
 
   def handle_info({:basic_deliver, payload, meta}, state) do
-    Logger.debug "[#{name()}] Received message: #{payload}."
+    Logger.debug("[#{__MODULE__}] Received message: #{payload}.")
+
     ExRabbit.Consumer.WorkerSupervisor.handle_message(payload, meta, self())
     {:noreply, state}
   end
 
   def handle_info({:basic_consume_ok, %{consumer_tag: ctag}}, state) do
-    Logger.info "[#{name()}] Successfully registered consumer as #{ctag}"
+    Logger.info("[#{__MODULE__}] Successfully registered consumer as #{ctag}")
+
     {:noreply, state}
   end
 
@@ -36,13 +36,15 @@ defmodule ExRabbit.Consumer.Consumer do
   # ExRabbit.Consumer.Worker callbacks
 
   def handle_cast({:ack, %{meta: %{delivery_tag: dtag}}}, %{channel: channel} = state) do
-    Logger.debug "[#{name()}] Acknowledging message."
+    Logger.debug("[#{__MODULE__}] Acknowledging message.")
+
     AMQP.Basic.ack(channel, dtag)
     {:noreply, state}
   end
 
   def handle_cast({:reject, %{meta: %{delivery_tag: dtag}}}, %{channel: channel} = state) do
-    Logger.debug "[#{name()}] Rejecting message."
+    Logger.debug("[#{__MODULE__}] Rejecting message.")
+
     AMQP.Basic.reject(channel, dtag, [requeue: false])
     {:noreply, state}
   end
@@ -56,7 +58,7 @@ defmodule ExRabbit.Consumer.Consumer do
       {:ok, channel} ->
         {:ok, channel}
       {:error, reason} ->
-        Logger.error("[#{name()}] Error opening a channel: #{reason}. Waiting to try again...")
+        Logger.error("[#{__MODULE__}] Error opening a channel: #{reason}. Waiting to try again...")
 
         :timer.sleep(Application.get_env(:ex_rabbit, :backoff))
         open_channel()
@@ -82,9 +84,9 @@ defmodule ExRabbit.Consumer.Consumer do
          :ok              <- AMQP.Basic.qos(channel, qos_options)
     do
       {:ok, _ctag} = AMQP.Basic.consume(channel, queue_name, self(), consume_options)
-      Logger.info "[#{name()}] AMQP channel open."
+      Logger.info("[#{__MODULE__}] AMQP channel open.")
     else
-      err -> Logger.error "[#{name()}] Error opening channel. #{err}"
+      err -> Logger.error("[#{__MODULE__}] Error opening channel. #{err}")
     end
   end
 
