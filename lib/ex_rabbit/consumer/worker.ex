@@ -8,8 +8,8 @@ defmodule ExRabbit.Consumer.Worker do
   the option to not requeue is set).
   """
 
-  use GenServer
   require Logger
+  use GenServer
 
   def start_link(payload, meta, consumer_pid) do
     module = Process.info(consumer_pid) |> Keyword.get(:registered_name)

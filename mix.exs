@@ -48,6 +48,7 @@ defmodule ExRabbit.Mixfile do
       {:poison, "~> 2.2"},
 
       # Development
+      {:credo, "~> 0.5", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev, :test], runtime: false},
       {:espec, "~> 1.3.0", only: :test},
       {:ex_doc, "~> 0.10", only: :dev},

@@ -12,9 +12,9 @@ defmodule ExRabbit.Application do
   * `ExRabbit.Publisher` - A `Supervisor` to manage a channel pool
   """
 
-  use Application
   import Supervisor.Spec
   require Logger
+  use Application
 
   def start(_type, _args) do
     Supervisor.start_link(__MODULE__, [], name: __MODULE__)

@@ -5,8 +5,10 @@ defmodule ExRabbit.Consumer.Consumer do
   It keeps its own `AMQP.Channel` for consumption. Message acknowledgement and rejection is handled here.
   """
 
-  use GenServer
+  alias ExRabbit.Consumer.WorkerSupervisor
   require Logger
+  use AMQP
+  use GenServer
 
   def start_link(module) do
     GenServer.start_link(__MODULE__, module, name: ExRabbit.Application.via({__MODULE__, module}))
@@ -15,7 +17,7 @@ defmodule ExRabbit.Consumer.Consumer do
   def init(module) do
     {:ok, channel} = open_channel()
 
-    config = Keyword.merge(config(), module.config())
+    config = Keyword.merge(default_config(), module.config())
     setup(channel, config)
 
     {:ok, %{channel: channel, config: config}}
@@ -26,7 +28,7 @@ defmodule ExRabbit.Consumer.Consumer do
   def handle_info({:basic_deliver, payload, meta}, state) do
     Logger.debug("[#{__MODULE__}] Received message: #{payload}.")
 
-    ExRabbit.Consumer.WorkerSupervisor.handle_message(payload, meta, self())
+    WorkerSupervisor.handle_message(payload, meta, self())
     {:noreply, state}
   end
 
@@ -44,14 +46,14 @@ defmodule ExRabbit.Consumer.Consumer do
   def handle_cast({:ack, %{meta: %{delivery_tag: dtag}}}, %{channel: channel} = state) do
     Logger.debug("[#{__MODULE__}] Acknowledging message.")
 
-    AMQP.Basic.ack(channel, dtag)
+    Basic.ack(channel, dtag)
     {:noreply, state}
   end
 
   def handle_cast({:reject, %{meta: %{delivery_tag: dtag}}}, %{channel: channel} = state) do
     Logger.debug("[#{__MODULE__}] Rejecting message.")
 
-    AMQP.Basic.reject(channel, dtag, [requeue: false])
+    Basic.reject(channel, dtag, [requeue: false])
     {:noreply, state}
   end
 
@@ -59,11 +61,11 @@ defmodule ExRabbit.Consumer.Consumer do
 
   # Calls for a connection to RabbitMQ, then opens a channel on the connection. If a channel fails to open, it will
   # retry.
-  @spec open_channel() :: {:ok, AMQP.Channel.t}
+  @spec open_channel() :: {:ok, Channel.t}
   defp open_channel() do
     connection = GenServer.call(ExRabbit.Connection, :get)
 
-    case AMQP.Channel.open(connection) do
+    case Channel.open(connection) do
       {:ok, channel} ->
         {:ok, channel}
       {:error, reason} ->
@@ -76,8 +78,11 @@ defmodule ExRabbit.Consumer.Consumer do
 
   # Asserts the exchange, queue, binding, qos according to the given consumer module's config/0 output and begins
   # consuming.
-  @spec setup(AMQP.Channel.t, keyword()) :: {:ok, String.t}
+  @spec setup(Channel.t, keyword()) :: {:ok, String.t}
   defp setup(channel, config) do
+    default_queue_name = "#{exchange_name}-#{Application.get_env(:ex_rabbit, :name)}-#{name}"
+    prefetch_count = Application.get_env(:ex_rabbit, :prefetch_count)
+
     with name             <- Keyword.get(config, :name, :ex_rabbit),
          exchange         <- Keyword.get(config, :exchange, []),
          exchange_name    <- Keyword.get(exchange, :name, :ex_rabbit),
@@ -85,17 +90,17 @@ defmodule ExRabbit.Consumer.Consumer do
          exchange_options <- Keyword.get(exchange, :options, [durable: true]),
          routing_key      <- Keyword.get(config, :routing_key, ""),
          queue            <- Keyword.get(config, :queue, []),
-         queue_name       <- Keyword.get(queue, :name, "#{exchange_name}-#{Application.get_env(:ex_rabbit, :name)}-#{name}"),
+         queue_name       <- Keyword.get(queue, :name, default_queue_name),
          queue_options    <- Keyword.get(queue, :options, [durable: true]),
          binding_options  <- Keyword.get(config, :binding_options, [routing_key: routing_key]),
          consume_options  <- Keyword.get(config, :consume_options, [consumer_tag: __MODULE__]),
-         qos_options      <- Keyword.get(config, :qos_options, [prefetch_count: Application.get_env(:ex_rabbit, :prefetch_count)]),
-         {:ok, _}         <- AMQP.Queue.declare(channel, queue_name, queue_options),
-         :ok              <- AMQP.Exchange.declare(channel, exchange_name, exchange_type, exchange_options),
-         :ok              <- AMQP.Queue.bind(channel, queue_name, exchange_name, binding_options),
-         :ok              <- AMQP.Basic.qos(channel, qos_options)
+         qos_options      <- Keyword.get(config, :qos_options, [prefetch_count: prefetch_count]),
+         {:ok, _}         <- Queue.declare(channel, queue_name, queue_options),
+         :ok              <- Exchange.declare(channel, exchange_name, exchange_type, exchange_options),
+         :ok              <- Queue.bind(channel, queue_name, exchange_name, binding_options),
+         :ok              <- Basic.qos(channel, qos_options)
     do
-      {:ok, ctag} = AMQP.Basic.consume(channel, queue_name, self(), consume_options)
+      {:ok, ctag} = Basic.consume(channel, queue_name, self(), consume_options)
       Logger.info("[#{__MODULE__}] AMQP channel open for consumer #{ctag}.")
       {:ok, ctag}
     else
@@ -104,8 +109,8 @@ defmodule ExRabbit.Consumer.Consumer do
   end
 
   # Default configuration options.
-  @spec config() :: keyword()
-  defp config() do
+  @spec default_config() :: keyword()
+  defp default_config() do
     [
       name: "rabbit_name",
       exchange: [

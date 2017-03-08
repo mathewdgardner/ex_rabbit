@@ -5,6 +5,7 @@ defmodule ExRabbit.Publisher do
   Supervises `ExRabbit.Publisher.Worker` to pool together an `AMQP.Channel` collection.
   """
 
+  use AMQP
   use Supervisor
   require Logger
 
@@ -35,6 +36,6 @@ defmodule ExRabbit.Publisher do
 
     ExRabbit.Application.via({ExRabbit.Publisher.Worker, Enum.random(1..pool_size)})
       |> GenServer.call(:get)
-      |> AMQP.Basic.publish(exchange, routing_key, payload, options)
+      |> Basic.publish(exchange, routing_key, payload, options)
   end
 end

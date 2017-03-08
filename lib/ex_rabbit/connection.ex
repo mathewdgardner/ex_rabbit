@@ -5,8 +5,9 @@ defmodule ExRabbit.Connection do
   If the `AMQP.Connection` is lost or the supervision tree goes down, a new connection will be obtained.
   """
 
-  use GenServer
   require Logger
+  use AMQP
+  use GenServer
 
   def start_link() do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
@@ -40,9 +41,9 @@ defmodule ExRabbit.Connection do
 
   # Opens a connection to RabbitMQ. If the connection is lost or the supervision tree fails it will reconnect. If it
   # cannot obtain a connection, it will retry.
-  @spec connect() :: {:ok, AMQP.Connection.t}
+  @spec connect() :: {:ok, Connection.t}
   defp connect() do
-    case AMQP.Connection.open(url()) do
+    case Connection.open(url()) do
       {:ok, conn} ->
         Process.link(conn.pid)
         {:ok, conn}

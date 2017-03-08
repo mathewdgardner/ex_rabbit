@@ -5,8 +5,8 @@ defmodule ExRabbit.Consumer.WorkerSupervisor do
   Supervises `ExRabbit.Consumer.Worker` but only spawns when a message is received.
   """
 
-  use Supervisor
   require Logger
+  use Supervisor
 
   def start_link() do
     Supervisor.start_link(__MODULE__, [], name: __MODULE__)

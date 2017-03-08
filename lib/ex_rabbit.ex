@@ -26,6 +26,8 @@ defmodule ExRabbit do
   taken care of for you in `ExRabbit.Consumer.Consumer` from where your callback is called.
   """
 
+  alias ExRabbit.Publisher
+
   @doc """
   This callback must return a keyword list dictating what options to use when setting up the consumer. Examples can be
   found in the [examples](https://github.com/vinli/ex_rabbit/tree/master/examples) directory.
@@ -46,5 +48,5 @@ defmodule ExRabbit do
   @spec publish(String.t, String.t, map() | String.t, keyword()) :: :ok
   def publish(exchange, routing_key, payload, options \\ [])
   def publish(exchange, routing_key, payload, options),
-  do: ExRabbit.Publisher.publish(exchange, routing_key, payload, options)
+  do: Publisher.publish(exchange, routing_key, payload, options)
 end

@@ -5,8 +5,9 @@ defmodule ExRabbit.Publisher.Worker do
   If the `AMQP.Channel` is borked or the supervision tree fails, a new channel will be obtained.
   """
 
-  use GenServer
   require Logger
+  use AMQP
+  use GenServer
 
   def start_link(num) do
     GenServer.start_link(__MODULE__, [], name: ExRabbit.Application.via({__MODULE__, num}))
@@ -26,11 +27,11 @@ defmodule ExRabbit.Publisher.Worker do
 
   # Calls for a connection to RabbitMQ, then opens a channel on the connection. If a channel fails to open, it will
   # retry.
-  @spec open_channel() :: {:ok, AMQP.Channel.t}
+  @spec open_channel() :: {:ok, Channel.t}
   defp open_channel() do
     connection = GenServer.call(ExRabbit.Connection, :get)
 
-    case AMQP.Channel.open(connection) do
+    case Channel.open(connection) do
       {:ok, channel} ->
         {:ok, channel}
       {:error, reason} ->
