@@ -10,7 +10,15 @@ defmodule ExRabbit.Mixfile do
       start_permanent: Mix.env == :prod,
       elixirc_paths: elixirc_paths(Mix.env),
       deps: deps(),
-      preferred_cli_env: [espec: :test]
+      preferred_cli_env: [espec: :test],
+
+      # Docs
+      name: "ExRabbit",
+      source_url: "https://github.com/vinli/ex_rabbit",
+      homepage_url: "https://github.com/vinli/ex_rabbit",
+      docs: [
+        main: "ExRabbit"
+      ]
     ]
   end
 
@@ -42,6 +50,7 @@ defmodule ExRabbit.Mixfile do
       # Development
       {:dialyxir, "~> 0.5", only: [:dev, :test], runtime: false},
       {:espec, "~> 1.3.0", only: :test},
+      {:ex_doc, "~> 0.10", only: :dev},
       {:httpoison, "~> 0.10.0", only: :test},
       {:mock, "~> 0.2.0", only: :test}
     ]

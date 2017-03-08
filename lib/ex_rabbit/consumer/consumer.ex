@@ -1,8 +1,8 @@
 defmodule ExRabbit.Consumer.Consumer do
   @moduledoc """
-    `GenServer` to consume a queue keeping its own `AMQP.Channel` for consumption.
+  `GenServer` to consume messages from a queue.
 
-    Message acknowledgement and rejection is handled here.
+  It keeps its own `AMQP.Channel` for consumption. Message acknowledgement and rejection is handled here.
   """
 
   use GenServer

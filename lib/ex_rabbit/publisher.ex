@@ -1,8 +1,8 @@
 defmodule ExRabbit.Publisher do
   @moduledoc """
-    `Supervisor` for managing a channel pool.
+  `Supervisor` for managing an channel pool.
 
-    Each worker, `ExRabbit.Publisher.Worker`, is a `GenServer` holding a `AMQP.Channel`.
+  Supervises `ExRabbit.Publisher.Worker` to pool together an `AMQP.Channel` collection.
   """
 
   use Supervisor
@@ -19,7 +19,7 @@ defmodule ExRabbit.Publisher do
   end
 
   @doc """
-    Publish a message to an exchange. An `AMQP.Channel` will be randomly aquired from the pool for use.
+  Publish a message to an exchange. An `AMQP.Channel` will be randomly aquired from the pool for use.
   """
   @spec publish(String.t, String.t, map() | String.t, keyword()) :: :ok
   def publish(_exchange, _routing_key, _payload, options \\ [])

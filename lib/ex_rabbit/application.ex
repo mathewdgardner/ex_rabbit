@@ -1,15 +1,15 @@
 defmodule ExRabbit.Application do
   @moduledoc """
-    The `ExRabbit` application is the root its supervision tree.
+  The root of the `ExRabbit` supervistion tree.
 
-    It supervises:
+  It supervises:
 
-      * `ExRabbit.Connection` - A `GenServer` whose state is a connection to RabbitMQ
-      * `Registry` - A registry for the application to keep track of worker pids
-      * `ExRabbit.Consumer` - A `Supervisor` to manage consumers
-      * `ExRabbit.Consumer.WorkerSupervisor` - A `Supervisor` that spawns `GenServer`s to handle messages from a
-         consumer
-      * `ExRabbit.Publisher` - A `Supervisor` to manage a channel pool
+  * `ExRabbit.Connection` - A `GenServer` whose state is a connection to RabbitMQ
+  * `Registry` - A registry for the application to keep track of worker pids
+  * `ExRabbit.Consumer` - A `Supervisor` to manage consumers
+  * `ExRabbit.Consumer.WorkerSupervisor` - A `Supervisor` that spawns `GenServer`s to handle messages from a
+      consumer
+  * `ExRabbit.Publisher` - A `Supervisor` to manage a channel pool
   """
 
   use Application
@@ -20,7 +20,7 @@ defmodule ExRabbit.Application do
     Supervisor.start_link(__MODULE__, [], name: __MODULE__)
   end
 
-  def init(_args) do
+  def init([]) do
     children = [
       worker(ExRabbit.Connection, []),
       supervisor(Registry, [:unique, :ex_rabbit_registry]),
@@ -33,7 +33,7 @@ defmodule ExRabbit.Application do
   end
 
   @doc """
-    Returns the `:via` tuple for use with the Registry.
+  Returns the `:via` tuple for use with the Registry.
   """
   @spec via(any()) :: {:via, atom(), tuple()}
   def via(name), do: {:via, Registry, {:ex_rabbit_registry, name}}

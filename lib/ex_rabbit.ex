@@ -1,31 +1,47 @@
 defmodule ExRabbit do
   @moduledoc """
-    ExRabbit is a module that conveniently manages your connection to RabbitMQ and its channels for you.
+  ExRabbit is a module that conveniently manages your connection to RabbitMQ and its channels for you.
 
-    It keeps a channel for each consumer and a channel pool for you to publish with. All you need to do is define a
-    module that implements the behaviour defined in `ExRabbit`, `config/0` and `handler/2`. Most of the options in
-    `config/0` are passed through to the AMQP module for exchange, queue, binding and qos assertions.
+  ## How it works
 
-    `config/0` and `handler/2` are called by `ExRabbit.Consumer.Consumer` when a message is being consumed. Examples can
-    be found in the examples directory.
+  For each module given to act as a consumer, it will assert the exchange, queue, binding and qos according to the
+  output of the `config/0` callback on your module. Upon each message received your module's `handler/2` callback is
+  called providing the message and properties from RabbitMQ. A `AMQP.Channel` is reserved for each consumer in order to
+  prevent other consumer/publisher errors from affecting this consumer.
+
+  ## Defining your module
+
+  Your module must implement the `ExRabbit` `@behaviour` as described
+  [here](https://hexdocs.pm/elixir/master/Module.html#content).
+
+  ### `config/0`
+
+  This callback must return a keyword list dictating what options to use when setting up the consumer. Examples can be
+  found in the [examples](https://github.com/vinli/ex_rabbit/tree/master/examples) directory.
+
+  ### `handler/2`
+
+  This callback must return an `{:ok, result}` or `{:error, reason}` tuple. If an `:ok` tuple is returned the message
+  will be acknowledged. Otherwise, if an `:error` tuple is returned, the message will be rejected. This behavior is
+  taken care of for you in `ExRabbit.Consumer.Consumer` from where your callback is called.
   """
 
   @doc """
-    This function must be implemented to provide a custom configuration. Example configurations can be found in the
-    examples directory.
+  This callback must return a keyword list dictating what options to use when setting up the consumer. Examples can be
+  found in the [examples](https://github.com/vinli/ex_rabbit/tree/master/examples) directory.
   """
   @callback config() :: {:ok, list()} | {:error, String.t}
 
   @doc """
-    This function must be implemented to handle a message that is consumed off of a queue. It should return an
-    `{:ok, result}` tuple with a list of keyword lists indicating any new messages to publish. Alternatively, it can
-    return an `{:error, reason}` tuple with a reason.
+  This callback must return an `{:ok, result}` or `{:error, reason}` tuple. If an `:ok` tuple is returned the message
+  will be acknowledged. Otherwise, if an `:error` tuple is returned, the message will be rejected. This behavior is
+  taken care of for you in `ExRabbit.Consumer.Consumer` from where your callback is called.
   """
-  @callback handler(Map, Map) :: {:ok, list(keyword())} | {:error, String.t}
+  @callback handler(map(), map()) :: {:ok, list(keyword())} | {:error, String.t}
 
   @doc """
-    Publish a message to an exchange. Possible options are available from:
-    https://github.com/pma/amqp/blob/master/lib/amqp/basic.ex
+  Publish a message to an exchange. Possible options are available from:
+  https://github.com/pma/amqp/blob/master/lib/amqp/basic.ex
   """
   @spec publish(String.t, String.t, map() | String.t, keyword()) :: :ok
   def publish(exchange, routing_key, payload, options \\ [])

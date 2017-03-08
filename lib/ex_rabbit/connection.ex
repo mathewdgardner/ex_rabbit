@@ -1,8 +1,8 @@
 defmodule ExRabbit.Connection do
   @moduledoc """
-    `GenServer` for keeping a `AMQP.Connection` to RabbitMQ.
+  `GenServer` for keeping a `AMQP.Connection` to RabbitMQ.
 
-    If the `AMQP.Connection` is lost or the supervision tree goes down, a new connection will be obtained.
+  If the `AMQP.Connection` is lost or the supervision tree goes down, a new connection will be obtained.
   """
 
   use GenServer
@@ -23,7 +23,7 @@ defmodule ExRabbit.Connection do
   end
 
   @doc """
-    Build the URL to RabbitMQ from the application's configuration.
+  Build the URL to RabbitMQ from the application's configuration.
   """
   @spec url() :: String.t
   def url() do

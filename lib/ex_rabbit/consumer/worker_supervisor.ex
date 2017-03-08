@@ -1,6 +1,8 @@
 defmodule ExRabbit.Consumer.WorkerSupervisor do
   @moduledoc """
-    `Supervisor` for creating workers, `ExRabbit.Consumer.Worker`, on message receipt.
+  `Supervisor` for creating a worker for each message received.
+
+  Supervises `ExRabbit.Consumer.Worker` but only spawns when a message is received.
   """
 
   use Supervisor
@@ -19,7 +21,7 @@ defmodule ExRabbit.Consumer.WorkerSupervisor do
   end
 
   @doc """
-    Spawns a `ExRabbit.Consumer.Worker` `GenServer` to handle the given message.
+  Spawns a `ExRabbit.Consumer.Worker` `GenServer` to handle the given message.
   """
   @spec handle_message(map(), map(), pid()) :: :ok
   def handle_message(payload, meta, consumer_pid) do

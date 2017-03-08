@@ -1,8 +1,8 @@
 defmodule ExRabbit.Publisher.Worker do
   @moduledoc """
-    `GenServer` used as member to a `AMQP.Channel` pool.
+  `GenServer` used to hold a channel.
 
-    If the `AMQP.Channel` is borked or the supervision tree fails, a new `AMQP.Channel` will be obtained.
+  If the `AMQP.Channel` is borked or the supervision tree fails, a new channel will be obtained.
   """
 
   use GenServer
