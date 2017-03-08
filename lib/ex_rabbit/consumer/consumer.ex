@@ -80,25 +80,25 @@ defmodule ExRabbit.Consumer.Consumer do
   # consuming.
   @spec setup(Channel.t, keyword()) :: {:ok, String.t}
   defp setup(channel, config) do
-    default_queue_name = "#{exchange_name}-#{Application.get_env(:ex_rabbit, :name)}-#{name}"
     prefetch_count = Application.get_env(:ex_rabbit, :prefetch_count)
 
-    with name             <- Keyword.get(config, :name, :ex_rabbit),
-         exchange         <- Keyword.get(config, :exchange, []),
-         exchange_name    <- Keyword.get(exchange, :name, :ex_rabbit),
-         exchange_type    <- Keyword.get(exchange, :type, :topic),
-         exchange_options <- Keyword.get(exchange, :options, [durable: true]),
-         routing_key      <- Keyword.get(config, :routing_key, ""),
-         queue            <- Keyword.get(config, :queue, []),
-         queue_name       <- Keyword.get(queue, :name, default_queue_name),
-         queue_options    <- Keyword.get(queue, :options, [durable: true]),
-         binding_options  <- Keyword.get(config, :binding_options, [routing_key: routing_key]),
-         consume_options  <- Keyword.get(config, :consume_options, [consumer_tag: __MODULE__]),
-         qos_options      <- Keyword.get(config, :qos_options, [prefetch_count: prefetch_count]),
-         {:ok, _}         <- Queue.declare(channel, queue_name, queue_options),
-         :ok              <- Exchange.declare(channel, exchange_name, exchange_type, exchange_options),
-         :ok              <- Queue.bind(channel, queue_name, exchange_name, binding_options),
-         :ok              <- Basic.qos(channel, qos_options)
+    with name               <- Keyword.get(config, :name, :ex_rabbit),
+         exchange           <- Keyword.get(config, :exchange, []),
+         exchange_name      <- Keyword.get(exchange, :name, :ex_rabbit),
+         exchange_type      <- Keyword.get(exchange, :type, :topic),
+         exchange_options   <- Keyword.get(exchange, :options, [durable: true]),
+         routing_key        <- Keyword.get(config, :routing_key, ""),
+         queue              <- Keyword.get(config, :queue, []),
+         default_queue_name <- "#{exchange_name}-#{Application.get_env(:ex_rabbit, :name)}-#{name}",
+         queue_name         <- Keyword.get(queue, :name, default_queue_name),
+         queue_options      <- Keyword.get(queue, :options, [durable: true]),
+         binding_options    <- Keyword.get(config, :binding_options, [routing_key: routing_key]),
+         consume_options    <- Keyword.get(config, :consume_options, [consumer_tag: __MODULE__]),
+         qos_options        <- Keyword.get(config, :qos_options, [prefetch_count: prefetch_count]),
+         {:ok, _}           <- Queue.declare(channel, queue_name, queue_options),
+         :ok                <- Exchange.declare(channel, exchange_name, exchange_type, exchange_options),
+         :ok                <- Queue.bind(channel, queue_name, exchange_name, binding_options),
+         :ok                <- Basic.qos(channel, qos_options)
     do
       {:ok, ctag} = Basic.consume(channel, queue_name, self(), consume_options)
       Logger.info("[#{__MODULE__}] AMQP channel open for consumer #{ctag}.")
