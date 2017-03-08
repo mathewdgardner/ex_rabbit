@@ -1,7 +1,8 @@
 defmodule ExRabbit.Connection do
   @moduledoc """
-    GenServer for keeping a connection to RabbitMQ. If the connection is lost or the supervision tree goes down, a new
-    connection will be obtained.
+    `GenServer` for keeping a `AMQP.Connection` to RabbitMQ.
+
+    If the `AMQP.Connection` is lost or the supervision tree goes down, a new connection will be obtained.
   """
 
   use GenServer

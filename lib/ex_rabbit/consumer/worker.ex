@@ -1,9 +1,11 @@
 defmodule ExRabbit.Consumer.Worker do
   @moduledoc """
-    GenServer that is spawned for message consumption. It will call its given consumer module's callbacks config/0 and
-    handler/2. config/0 is called on initializaion when a new message is being consumed and handler/2 is called to
-    handle the message. If an ok tuple is returned, the message will be acknowledged. Otherwise, it will be rejected and
-    placed back into the queue (unless the option to not requeue is set).
+    `GenServer` that is spawned for message consumption.
+
+    It will call its given consumer module's callbacks `config/0` and
+    `handler/2`. `config/0` is called on initializaion when a new message is being consumed and `handler/2` is called to
+    handle the message. If an `{:ok, result}` tuple is returned, the message will be acknowledged. Otherwise, it will be
+    rejected and placed back into the queue (unless the option to not requeue is set).
   """
 
   use GenServer

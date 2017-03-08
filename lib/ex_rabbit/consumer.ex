@@ -1,6 +1,6 @@
 defmodule ExRabbit.Consumer do
   @moduledoc """
-    Supervisor for the consumer modules.
+    `Supervisor` for the given consumer modules.
   """
 
   use Supervisor
