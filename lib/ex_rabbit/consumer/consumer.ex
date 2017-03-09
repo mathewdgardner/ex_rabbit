@@ -79,10 +79,10 @@ defmodule ExRabbit.Consumer.Consumer do
   # Asserts the exchange, queue, binding, qos according to the given consumer module's config/0 output and begins
   # consuming.
   @spec setup(Channel.t, keyword()) :: {:ok, String.t}
+  @lint {Credo.Check.Refactor.ABCSize, false}
   defp setup(channel, config) do
-    prefetch_count = Application.get_env(:ex_rabbit, :prefetch_count)
-
-    with name               <- Keyword.get(config, :name, :ex_rabbit),
+    with prefetch_count     <- Application.get_env(:ex_rabbit, :prefetch_count),
+         name               <- Keyword.get(config, :name, :ex_rabbit),
          exchange           <- Keyword.get(config, :exchange, []),
          exchange_name      <- Keyword.get(exchange, :name, :ex_rabbit),
          exchange_type      <- Keyword.get(exchange, :type, :topic),
