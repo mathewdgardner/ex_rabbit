@@ -91,7 +91,7 @@
         {Credo.Check.Refactor.DoubleBooleanNegation},
 
         # {Credo.Check.Refactor.CaseTrivialMatches}, # deprecated in 0.4.0
-        {Credo.Check.Refactor.ABCSize},
+        {Credo.Check.Refactor.ABCSize, false},
         {Credo.Check.Refactor.CondStatements},
         {Credo.Check.Refactor.CyclomaticComplexity},
         {Credo.Check.Refactor.FunctionArity},
