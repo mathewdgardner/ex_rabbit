@@ -10,6 +10,27 @@ defmodule ExRabbit.Consumer.Consumer do
   use AMQP
   use GenServer
 
+  # Default configuration options.
+  @config [
+    name: "rabbit_name",
+    exchange: [
+      type: :topic,
+      name: "my_exchange",
+      options: []
+    ],
+    routing_key: "the_topic",
+    queue: [
+      name: "my_queue",
+      options: [
+        durable: true,
+        arguments: []
+      ]
+    ],
+    binding_options: [],
+    consume_options: [],
+    qos_options: []
+  ]
+
   def start_link(module) do
     GenServer.start_link(__MODULE__, module, name: ExRabbit.Application.via({__MODULE__, module}))
   end
@@ -17,7 +38,7 @@ defmodule ExRabbit.Consumer.Consumer do
   def init(module) do
     {:ok, channel} = open_channel()
 
-    config = Keyword.merge(default_config(), module.config())
+    config = Keyword.merge(@config, module.config())
     setup(channel, config)
 
     {:ok, %{channel: channel, config: config}}
@@ -105,29 +126,5 @@ defmodule ExRabbit.Consumer.Consumer do
     else
       err -> Logger.error("[#{__MODULE__}] Error opening channel. #{inspect err}")
     end
-  end
-
-  # Default configuration options.
-  @spec default_config() :: keyword()
-  defp default_config() do
-    [
-      name: "rabbit_name",
-      exchange: [
-        type: :topic,
-        name: "my_exchange",
-        options: []
-      ],
-      routing_key: "the_topic",
-      queue: [
-        name: "my_queue",
-        options: [
-          durable: true,
-          arguments: []
-        ]
-      ],
-      binding_options: [],
-      consume_options: [],
-      qos_options: []
-    ]
   end
 end
