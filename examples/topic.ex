@@ -3,10 +3,15 @@ defmodule Examples.Topic do
 
   def config() do
     [
-      name: "topic_name",
+      consumer_name: "topic_name",
+      parse_json: true,
       exchange: [
         type: :topic,
-        name: "topic_exchange"
+        name: "topic_exchange",
+        options: [
+          durable: true,
+          arguments: []
+        ]
       ],
       queue: [
         name: "topic_queue",
@@ -20,7 +25,8 @@ defmodule Examples.Topic do
       binding_options: [
         routing_key: "the_topic"
       ],
-      parse_json: true
+      consume_options: [],
+      qos_options: []
     ]
   end
 

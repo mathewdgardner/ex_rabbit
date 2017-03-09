@@ -12,23 +12,32 @@ defmodule ExRabbit.Consumer.Consumer do
 
   # Default configuration options.
   @config [
-    name: "rabbit_name",
+    consumer_name: "ex_rabbit_consumer",
     exchange: [
       type: :topic,
-      name: "my_exchange",
-      options: []
-    ],
-    routing_key: "the_topic",
-    queue: [
-      name: "my_queue",
+      name: "ex_rabbit_exchange",
       options: [
         durable: true,
         arguments: []
       ]
     ],
-    binding_options: [],
-    consume_options: [],
-    qos_options: []
+    queue: [
+      name: nil,
+      options: [
+        durable: true,
+        arguments: []
+      ]
+    ],
+    binding_options: [
+      routing_key: ""
+    ],
+    consume_options: [
+      consumer_tag: __MODULE__
+    ],
+    qos_options: [
+      prefetch_count: Application.get_env(:ex_rabbit, :prefetch_count, 4)
+    ],
+    parse_json: true
   ]
 
   def start_link(module) do
@@ -42,7 +51,7 @@ defmodule ExRabbit.Consumer.Consumer do
     do
       {:ok, %{channel: channel, config: config}}
     else
-      err -> Logger.error("[#{__MODULE__}] Error opening channel. #{inspect err}")
+      err -> Logger.error("[#{__MODULE__}] Error settuping up consumer. #{inspect err}")
     end
   end
 
@@ -103,20 +112,17 @@ defmodule ExRabbit.Consumer.Consumer do
   # consuming.
   @spec setup(Channel.t, keyword()) :: {:ok, String.t}
   defp setup(channel, config) do
-    with prefetch_count     <- Application.get_env(:ex_rabbit, :prefetch_count),
-         name               <- Keyword.get(config, :name, :ex_rabbit),
-         exchange           <- Keyword.get(config, :exchange, []),
-         exchange_name      <- Keyword.get(exchange, :name, :ex_rabbit),
-         exchange_type      <- Keyword.get(exchange, :type, :topic),
-         exchange_options   <- Keyword.get(exchange, :options, [durable: true]),
-         routing_key        <- Keyword.get(config, :routing_key, ""),
-         queue              <- Keyword.get(config, :queue, []),
-         default_queue_name <- "#{exchange_name}-#{Application.get_env(:ex_rabbit, :name)}-#{name}",
-         queue_name         <- Keyword.get(queue, :name, default_queue_name),
-         queue_options      <- Keyword.get(queue, :options, [durable: true]),
-         binding_options    <- Keyword.get(config, :binding_options, [routing_key: routing_key]),
-         consume_options    <- Keyword.get(config, :consume_options, [consumer_tag: __MODULE__]),
-         qos_options        <- Keyword.get(config, :qos_options, [prefetch_count: prefetch_count]),
+    with consumer_name      <- Keyword.get(config, :consumer_name),
+         exchange           <- Keyword.get(config, :exchange),
+         exchange_name      <- Keyword.get(exchange, :name),
+         exchange_type      <- Keyword.get(exchange, :type),
+         exchange_options   <- Keyword.get(exchange, :options),
+         queue              <- Keyword.get(config, :queue),
+         queue_options      <- Keyword.get(queue, :options),
+         binding_options    <- Keyword.get(config, :binding_options),
+         consume_options    <- Keyword.get(config, :consume_options),
+         qos_options        <- Keyword.get(config, :qos_options),
+         queue_name         <- get_queue_name(queue, exchange_name, consumer_name),
          {:ok, _}           <- Queue.declare(channel, queue_name, queue_options),
          :ok                <- Exchange.declare(channel, exchange_name, exchange_type, exchange_options),
          :ok                <- Queue.bind(channel, queue_name, exchange_name, binding_options),
@@ -127,6 +133,18 @@ defmodule ExRabbit.Consumer.Consumer do
       {:ok, ctag}
     else
       err -> Logger.error("[#{__MODULE__}] Error opening channel. #{inspect err}")
+    end
+  end
+
+  # Get the queue name given or build a default. The default pattern is <exchange>-<service>-<consumer>
+  @spec get_queue_name(keyword(), String.t, String.t) :: String.t
+  defp get_queue_name(queue, exchange_name, consumer_name) do
+    case Keyword.get(queue, :name) do
+      nil ->
+        service_name = Application.get_env(:ex_rabbit, :service_name, "ex_rabbit")
+        "#{exchange_name}-#{service_name}-#{consumer_name}"
+
+      name -> name
     end
   end
 end

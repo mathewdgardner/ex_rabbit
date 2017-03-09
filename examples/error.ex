@@ -3,10 +3,15 @@ defmodule Examples.Error do
 
   def config() do
     [
-      name: "topic_name",
+      consumer_name: "topic_name",
+      parse_json: true,
       exchange: [
         type: :topic,
-        name: "topic_exchange"
+        name: "topic_exchange",
+        options: [
+          durable: true,
+          arguments: []
+        ]
       ],
       queue: [
         name: "error_topic_queue",
@@ -20,7 +25,8 @@ defmodule Examples.Error do
       binding_options: [
         routing_key: "error_topic"
       ],
-      parse_json: true
+      consume_options: [],
+      qos_options: []
     ]
   end
 

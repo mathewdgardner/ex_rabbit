@@ -3,22 +3,57 @@ defmodule Examples.FullOptions do
 
   def config() do
     [
-      name: "rabbit_name",
-      exchange: "my_exchange",
-      topic: "the_topic",
+      consumer_name: "my_name",
+      parse_json: true,
+      exchange: [
+        type: :topic,
+        name: "my_exchange",
+        options: [
+          passive: false,
+          durable: false,
+          auto_delete: false,
+          internal: false,
+          nowait: false,
+          arguments: [
+            {"alternate-exchange", "my_alt_exchange"}
+          ]
+        ]
+      ],
       queue: [
         name: "my_queue",
         options: [
-          durable: true,
+          passive: false,
+          durable: false,
+          exclusive: false,
+          auto_delete: false,
+          nowait: false,
           arguments: [
-            {"x-expires", ""},
-            {"x-message-ttl", ""},
-            {"x-dead-letter-routing-key", ""},
-            {"x-dead-letter-exchange", ""},
-            {"x-max-length", ""},
-            {"x-max-length-bytes", ""}
+            {"x-dead-letter-exchange", "exchange"},
+            {"x-dead-letter-routing-key", "key"},
+            {"x-expires", "expires"},
+            {"x-max-length", "length"},
+            {"x-max-length-bytes", "bytes"},
+            {"x-max-priority", "priority"},
+            {"x-message-ttl", "ttl"}
           ]
         ]
+      ],
+      binding_options: [
+        routing_key: "my_topic",
+        arguments: []
+      ],
+      consume_options: [
+        consumer_tag: "my_tag",
+        no_local: false,
+        no_ack: false,
+        exclusive: false,
+        nowait: false,
+        arguments: []
+      ],
+      qos_options: [
+        prefetch_size: 0,
+        prefetch_count: 0,
+        global: false
       ]
     ]
   end
