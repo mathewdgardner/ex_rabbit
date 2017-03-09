@@ -36,12 +36,14 @@ defmodule ExRabbit.Consumer.Consumer do
   end
 
   def init(module) do
-    {:ok, channel} = open_channel()
-
-    config = Keyword.merge(@config, module.config())
-    setup(channel, config)
-
-    {:ok, %{channel: channel, config: config}}
+    with {:ok, channel} <- open_channel(),
+         config         <- Keyword.merge(@config, module.config()),
+         {:ok, _ctag}   <- setup(channel, config)
+    do
+      {:ok, %{channel: channel, config: config}}
+    else
+      err -> Logger.error("[#{__MODULE__}] Error opening channel. #{inspect err}")
+    end
   end
 
   # AMQP.Basic.consume callbacks
